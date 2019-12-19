@@ -229,7 +229,6 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\src\index.cshtml" />
     <Content Include="Views\sub\ready.cshtml" />
-    <Content Include="Views\Shared\_combine-list.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
