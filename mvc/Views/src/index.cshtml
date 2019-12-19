@@ -1,0 +1,184 @@
+﻿@using System.Data;
+@using System.Data.SqlClient;
+@using System.Text.RegularExpressions;
+@{
+    Layout = @"~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "테스트";
+
+    SqlCommand dub = new SqlCommand("select * from d_order_print with(nolock) where date >= @start and date <= @end order by rowindex desc;");
+    dub.Parameters.Add("@start", SqlDbType.DateTime).Value = ViewBag.StartDate;
+    dub.Parameters.Add("@end", SqlDbType.DateTime).Value = ViewBag.EndDate;
+
+    DataTable dt = diaryLib.DB.Query(dub);
+
+    List<DataRow> dms = dt.AsEnumerable().ToList();
+
+    dms = combine_list_output(dms);
+
+    string s_Date = ViewBag.StartDate.ToString("yyyy-MM-dd");
+    string e_Date = ViewBag.EndDate.ToString("yyyy-MM-dd");
+
+    List<string> combine_arr = new List<string>();
+    int curr_idx = 1;
+}
+<div class="container">
+    <div>
+        @using (Html.BeginForm("index", "src", FormMethod.Post)) { 
+            @Html.Hidden("ver", Guid.NewGuid().ToString("N").Substring(0, 8));
+            @Html.TextBox("start", s_Date, new { placeholder = "시작일, 2019-01-01", style = "margin-right: 10px;" });
+            @Html.TextBox("end", e_Date, new { placeholder = "오늘, 2019-01-01", style = "margin-right: 10px;" });
+            <input type="submit" value="적용" />
+        }
+    </div>
+    <table class="d-table">
+        <colgroup>
+            <col width="60">
+            <col width="160">
+            <col width="70">
+            <col width="150">
+            <col width="140">
+            <col width="100">
+            <col width="100">
+            <col width="120">
+        </colgroup>
+        <tbody>
+            <tr>
+                <td>
+                </td>
+                <td>
+                    상품
+                </td>
+                <td>
+                    수량
+                </td>
+                <td>
+                    고객명
+                </td>
+                <td>
+                    주문일자
+                </td>
+                <td>
+                    검수상태
+                </td>
+                <td>
+                    입금상태
+                </td>
+                <td>
+                    주문금액
+                </td>
+                <td>
+                    상세보기
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="d-list-table">
+        <colgroup>
+            <col width="60">
+            <col width="160">
+            <col width="70">
+            <col width="150">
+            <col width="140">
+            <col width="100">
+            <col width="100">
+            <col width="120">
+        </colgroup>
+        <tbody>
+            @foreach (DataRow dr in dms)
+            {
+                string re_name = dr["re_name"].ToString();
+                if (re_name.IndexOfAny(new char[] { '(', '[' }) > 0 && re_name.Length <= 14)
+                {
+                    re_name = re_name.Insert(re_name.IndexOfAny(new char[] { '(', '[' }), "<br />");
+                }
+                else if (!Regex.IsMatch(re_name, "[a-zA-Z]", RegexOptions.IgnoreCase) && re_name.Length > 10)
+                {
+                    re_name = re_name.Insert(10, "<br />");
+                }
+                string d_date = ((DateTime)dr["date"]).ToString();
+
+                string result = dr["result"].ToString();
+                string result_2 = "";
+                if (result == "payed") { result_2 = "결제완료"; }
+                else if (result == "ready") { result_2 = "제작준비"; }
+                else if (result == "ing") { result_2 = "제작중"; }
+                else if (result == "finish") { result_2 = "발송완료"; }
+                else if (result == "cancel") { result_2 = "주문취소"; }
+                else if (result == "paying") { result_2 = "입금확인중"; }
+
+                double money = double.Parse(dr["money"].ToString());
+                double besongmoney = double.Parse(dr["besongmoney"].ToString());
+
+                string money_str = (money + besongmoney).ToString("#,#;0;0");
+                <tr>
+                    <td class="row2_1">@(curr_idx)</td>
+                    <td class="row2_1">
+                        @(Regex.IsMatch(dr["company_code"].ToString(), "sj|cl") ? "우리학교서재" :
+                        (dr["company_code"].ToString() == "2d" ? "상업인쇄 (280days)" : "상업인쇄")) @if (dr["booktitle"].ToString().IndexOf(" (외 ") != -1) {
+                            @(new HtmlString("(외 " + Regex.Split(dr["booktitle"].ToString(), "\\(외 ", RegexOptions.IgnoreCase)[1])) }
+                    </td>
+                    <td class="row2_1">@(dr["ea"].ToString())</td>
+                    <td class="row2_1"><span style="color:#00f;">@(new HtmlString(re_name))</span></td>
+                    <td class="row2_1">@(new HtmlString(d_date.Replace("오", "<br />오")))</td>
+                    <td class="row2_1">@(result_2)</td>
+                    <td class="row2_1">
+                        <div>입금확인필요</div>
+                        <div class="sub-link" onclick="pricing('card', 137555)">카드로 입금</div>
+                        <div class="sub-link" onclick="pricing('off', 137555)">무통장 입금</div>
+                    </td>
+                    <td class="row2_1">@(money_str)원</td>
+                    <td class="row2_1">
+                        <a class="sub-link" href="orderlist_detail-print.aspx?company_code=@(dr["company_code"].ToString())&num=@(dr["num"].ToString())">상세보기</a>
+                    </td>
+                </tr>
+                curr_idx++;
+             }
+        </tbody>
+    </table>
+</div>
+@functions {
+    private List<DataRow> combine_list_output(List<DataRow> _data)
+    {
+        List<DataRow> _union = new List<DataRow>();
+
+        if (_data.Where(d => d["combine_code"].ToString().Trim().Length > 2).Count() > 0)
+        {
+            List<DataRow> comb_list = new List<DataRow>();
+            List<string> arr_combine = _data.Where(d => d["combine_code"].ToString().Trim().Length > 2).Select(b => b["combine_code"].ToString().Trim()).ToList();
+            arr_combine = arr_combine.Distinct().ToList();
+            foreach (string cb in arr_combine)
+            {
+                if (_data.Where(f => f["num"].ToString().Equals(cb.Trim())).Count() <= 0) { continue; }
+
+                DataRow r_bb = _data.Where(f => f["num"].ToString().Equals(cb.Trim())).First();
+
+                int ou_count = 0;
+                int tot_ea = 0;
+                int tot_amount = 0;
+                int tot_besong = 0;
+                foreach (DataRow dm in _data.Where(d => d["combine_code"].ToString().Equals(cb.Trim())))
+                {
+                    tot_ea += ((int)dm["ea"]);
+                    tot_amount += (int)((double)dm["money"]);
+                    tot_besong += (int)((double)dm["besongmoney"]);
+                    ou_count++;
+                }
+                ou_count = ou_count - 1;
+
+                r_bb["money"] = tot_amount;
+                r_bb["ea"] = tot_ea;
+                r_bb["besongmoney"] = tot_besong;
+                r_bb["booktitle"] = r_bb["booktitle"].ToString() + " (외 " + ou_count + "건)";
+                comb_list.Add(r_bb);
+            }
+            List<DataRow> no_comb_list = _data.Where(d => d["combine_code"].ToString().Trim().Length < 2).ToList();
+            _union = no_comb_list.Union(comb_list).OrderByDescending(v => double.Parse(((DateTime)v["date"]).ToString("yyyyMMddHHmmss"))).ToList();
+        }
+        else
+        {
+            _union = _data;
+        }
+
+        return _union;
+    }
+}
