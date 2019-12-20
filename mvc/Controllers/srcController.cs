@@ -8,7 +8,7 @@ namespace mvc.Controllers
 {
     public class srcController : Controller
     {
-        public ActionResult Index(DateTime? start, DateTime? end)
+        public ActionResult index(DateTime? start, DateTime? end)
         {
             if (!start.HasValue && !end.HasValue)
             {
