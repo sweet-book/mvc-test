@@ -20,6 +20,12 @@ namespace mvc.Controllers
                 ViewBag.StartDate = start;
                 ViewBag.EndDate = end;
             }
+            TempData["test"] = "bent";
+            return View();
+        }
+
+        public ActionResult test()
+        {
             return View();
         }
     }
