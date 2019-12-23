@@ -8,7 +8,7 @@ namespace mvc.Controllers
 {
     public class srcController : Controller
     {
-        public ActionResult index(DateTime? start, DateTime? end)
+        public ActionResult index(DateTime? start, DateTime? end, int? page)
         {
             if (!start.HasValue && !end.HasValue)
             {
@@ -20,9 +20,10 @@ namespace mvc.Controllers
                 ViewBag.StartDate = start;
                 ViewBag.EndDate = end;
             }
-            //TempData["test"] = "bent";
-            //ViewBag.Tester = "bent";
-            //ViewData["test"] = "bent";
+            
+            if (!page.HasValue) { ViewBag.PageNumber = 1; }
+            else { ViewBag.PageNumber = (page <= 1 ? 1 : page); }
+
             return View();
         }
 
