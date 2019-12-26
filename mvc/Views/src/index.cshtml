@@ -33,7 +33,7 @@
         @Html.Hidden("ver", Guid.NewGuid().ToString("N").Substring(0, 8))
         @Html.TextBox("start", s_Date, new { placeholder = "시작일, 2019-01-01", style = "margin-right: 10px;" })
         @Html.TextBox("end", e_Date, new { placeholder = "오늘, 2019-01-01", style = "margin-right: 10px;" })
-        <input type="submit" value="적용" />
+        <input type="submit" value="적용" onclick="page.value=1;" />
     </div>
     <table class="d-table">
         <colgroup>
