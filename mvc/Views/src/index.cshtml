@@ -16,7 +16,8 @@
     dms = combine_list_output(dms);
     
     // 페이징..
-    //dms = page_throw(dms, 10);
+    int total_page = 0;
+    dms = page_throw(dms, 10, out total_page);
 
     string s_Date = ViewBag.StartDate.ToString("yyyy-MM-dd");
     string e_Date = ViewBag.EndDate.ToString("yyyy-MM-dd");
@@ -139,6 +140,15 @@
              }
         </tbody>
     </table>
+    @Html.Hidden("page", pager)
+    <div>
+        <a onclick="page.value=@(pager-1<=1?1:(pager-1));date_form.submit();">
+            이전
+        </a>
+        <a onclick="page.value=@(pager+1>=total_page?total_page:(pager+1));date_form.submit();">
+            다음
+        </a>
+    </div>
 }
 </div>
 @functions {
@@ -187,7 +197,7 @@
         return _union;
     }
 
-    private List<DataRow> page_throw(List<DataRow> _data, int item_count)
+    private List<DataRow> page_throw(List<DataRow> _data, int item_count, out int total_page)
     {
         int page = ViewBag.PageNumber;
         int skip = 0;
@@ -196,6 +206,8 @@
 
         List<DataRow> pp = new List<DataRow>();
         pp = _data.Skip(skip).Take(item_count).ToList();
+
+        total_page = (_data.Count / item_count) + (_data.Count % item_count > 0 ? 1 : 0);
 
         return pp;
     }
