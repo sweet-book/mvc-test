@@ -26,14 +26,13 @@
     int curr_idx = 1;
 }
 <div class="container">
+@using (Html.BeginForm("index", "src", FormMethod.Post, new { id = "date_form", name = "date_form" }))
+{
     <div>
-        @using (Html.BeginForm("index", "src", FormMethod.Post, new { id = "date_form", name = "date_form" }))
-        { 
-            @Html.Hidden("ver", Guid.NewGuid().ToString("N").Substring(0, 8))
-            @Html.TextBox("start", s_Date, new { placeholder = "시작일, 2019-01-01", style = "margin-right: 10px;" })
-            @Html.TextBox("end", e_Date, new { placeholder = "오늘, 2019-01-01", style = "margin-right: 10px;" })
-            <input type="submit" value="적용" />
-        }
+        @Html.Hidden("ver", Guid.NewGuid().ToString("N").Substring(0, 8))
+        @Html.TextBox("start", s_Date, new { placeholder = "시작일, 2019-01-01", style = "margin-right: 10px;" })
+        @Html.TextBox("end", e_Date, new { placeholder = "오늘, 2019-01-01", style = "margin-right: 10px;" })
+        <input type="submit" value="적용" />
     </div>
     <table class="d-table">
         <colgroup>
@@ -140,6 +139,7 @@
              }
         </tbody>
     </table>
+}
 </div>
 @functions {
     private List<DataRow> combine_list_output(List<DataRow> _data)

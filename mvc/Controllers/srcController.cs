@@ -19,6 +19,7 @@ namespace mvc.Controllers
             {
                 ViewBag.StartDate = start;
                 ViewBag.EndDate = end;
+                ViewBag.EndDate = DateTime.Parse(ViewBag.EndDate.ToString("yyyy-MM-dd") + " 23:59:59.000");
             }
             
             if (!page.HasValue) { ViewBag.PageNumber = 1; }
