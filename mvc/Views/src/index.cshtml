@@ -24,7 +24,7 @@
     int pager = ViewBag.PageNumber;
 
     List<string> combine_arr = new List<string>();
-    int curr_idx = 1;
+    int curr_idx = pager <= 1 ? 1 : (((pager - 1) * 10) + 1);
 }
 <div class="container">
 @using (Html.BeginForm("index", "src", FormMethod.Post, new { id = "date_form", name = "date_form" }))
